@@ -17,17 +17,24 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
 
     public static final String EXTRA_FEED_ID = "extra_feed_id";
     public static final String EXTRA_IMAGE_URL = "extra_image_url";
+    public static final String EXTRA_IMAGES = "extra_images";
     public static final String EXTRA_TITLE = "extra_title";
     public static final String EXTRA_CONTENT = "extra_content";
     public static final String EXTRA_TIME = "extra_time";
 
-    private ImageView ivDetailImage;
+    private androidx.viewpager2.widget.ViewPager2 viewPagerImages;
+    private TextView tvImageIndicator;
     private TextView tvDetailTitle;
     private TextView tvDetailContent;
     private TextView tvDetailTime;
+    private ImageView ivLike;
+    private ImageView ivCollect;
     private RecyclerView recyclerViewComments;
     private CommentAdapter commentAdapter;
     private Toolbar toolbar;
+
+    private boolean isLiked = false;
+    private boolean isCollected = false;
 
     @Override
     protected int getLayoutId() {
@@ -41,10 +48,13 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
 
     @Override
     protected void initView() {
-        ivDetailImage = findViewById(R.id.iv_detail_image);
+        viewPagerImages = findViewById(R.id.view_pager_images);
+        tvImageIndicator = findViewById(R.id.tv_image_indicator);
         tvDetailTitle = findViewById(R.id.tv_detail_title);
         tvDetailContent = findViewById(R.id.tv_detail_content);
         tvDetailTime = findViewById(R.id.tv_detail_time);
+        ivLike = findViewById(R.id.iv_like);
+        ivCollect = findViewById(R.id.iv_collect);
         recyclerViewComments = findViewById(R.id.recycler_view_comments);
         toolbar = findViewById(R.id.toolbar);
 
@@ -57,19 +67,41 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         commentAdapter = new CommentAdapter();
         recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewComments.setAdapter(commentAdapter);
+
+        ivLike.setOnClickListener(v -> toggleLike());
+        ivCollect.setOnClickListener(v -> toggleCollect());
     }
 
     @Override
     protected void initData() {
         String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
         String imageUrl = getIntent().getStringExtra(EXTRA_IMAGE_URL);
+        java.util.ArrayList<String> images = getIntent().getStringArrayListExtra(EXTRA_IMAGES);
         String title = getIntent().getStringExtra(EXTRA_TITLE);
         String content = getIntent().getStringExtra(EXTRA_CONTENT);
         String time = getIntent().getStringExtra(EXTRA_TIME);
 
-        if (imageUrl != null) {
-            ImageLoader.load(this, imageUrl, ivDetailImage);
+        com.example.moment_impressions.ui.detail.adapter.ImagePagerAdapter imageAdapter = new com.example.moment_impressions.ui.detail.adapter.ImagePagerAdapter();
+        viewPagerImages.setAdapter(imageAdapter);
+
+        if (images != null && !images.isEmpty()) {
+            imageAdapter.setItems(images);
+            updateIndicator(1, images.size());
+        } else if (imageUrl != null) {
+            java.util.List<String> singleList = new java.util.ArrayList<>();
+            singleList.add(imageUrl);
+            imageAdapter.setItems(singleList);
+            updateIndicator(1, 1);
         }
+
+        viewPagerImages.registerOnPageChangeCallback(new androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                updateIndicator(position + 1, imageAdapter.getItemCount());
+            }
+        });
+
         if (title != null) {
             tvDetailTitle.setText(title);
         }
@@ -87,6 +119,30 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         viewModel.getCommentList().observe(this, comments -> {
             commentAdapter.setItems(comments);
         });
+    }
+
+    private void updateIndicator(int current, int total) {
+        tvImageIndicator.setText(current + "/" + total);
+    }
+
+    private void toggleLike() {
+        isLiked = !isLiked;
+        if (isLiked) {
+            ivLike.setImageResource(android.R.drawable.btn_star_big_on);
+            ivLike.setColorFilter(getResources().getColor(android.R.color.holo_orange_light));
+        } else {
+            ivLike.setImageResource(android.R.drawable.btn_star);
+            ivLike.setColorFilter(getResources().getColor(android.R.color.black));
+        }
+    }
+
+    private void toggleCollect() {
+        isCollected = !isCollected;
+        if (isCollected) {
+            ivCollect.setColorFilter(getResources().getColor(android.R.color.holo_blue_light));
+        } else {
+            ivCollect.setColorFilter(getResources().getColor(android.R.color.black));
+        }
     }
 
     @Override

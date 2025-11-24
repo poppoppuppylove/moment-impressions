@@ -1,5 +1,8 @@
 package com.example.moment_impressions.data.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FeedItem {
     private String id;
     private String title;
@@ -11,6 +14,8 @@ public class FeedItem {
     private String content;
     private String time;
 
+    private List<String> images;
+
     public FeedItem(String id, String title, String imageUrl, User author, int likesCount) {
         this.id = id;
         this.title = title;
@@ -20,6 +25,8 @@ public class FeedItem {
         this.content = title
                 + " - This is the detailed content of the feed. It contains more information about the topic.";
         this.time = "2h ago";
+        this.images = new ArrayList<>();
+        this.images.add(imageUrl);
     }
 
     public FeedItem(String id, String title, String content, String imageUrl, User author, int likesCount,
@@ -31,6 +38,8 @@ public class FeedItem {
         this.author = author;
         this.likesCount = likesCount;
         this.time = time;
+        this.images = new ArrayList<>();
+        this.images.add(imageUrl);
     }
 
     public String getId() {
@@ -55,6 +64,22 @@ public class FeedItem {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+        if (this.images.isEmpty()) {
+            this.images.add(imageUrl);
+        } else {
+            this.images.set(0, imageUrl);
+        }
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+        if (images != null && !images.isEmpty()) {
+            this.imageUrl = images.get(0);
+        }
     }
 
     public User getAuthor() {

@@ -21,13 +21,31 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Image Area (Simplified ViewPager2 placeholder) -->
-                <ImageView
-                    android:id="@+id/iv_detail_image"
+                <!-- Image Area (ViewPager2) -->
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="400dp"
-                    android:scaleType="centerCrop"
-                    android:src="@mipmap/ic_launcher" />
+                    android:layout_height="400dp">
+
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/view_pager_images"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:id="@+id/tv_image_indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="16dp"
+                        android:background="@drawable/bg_indicator"
+                        android:paddingStart="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="4dp"
+                        android:text="1/1"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp" />
+                </FrameLayout>
 
                 <!-- Content Area -->
                 <LinearLayout
@@ -112,6 +130,7 @@
             android:textSize="12sp" />
 
         <ImageView
+            android:id="@+id/iv_like"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginStart="16dp"
@@ -119,10 +138,11 @@
             app:tint="@android:color/black" />
 
         <ImageView
+            android:id="@+id/iv_collect"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginStart="16dp"
-            android:src="@android:drawable/ic_menu_share"
+            android:src="@android:drawable/ic_menu_save"
             app:tint="@android:color/black" />
 
     </LinearLayout>

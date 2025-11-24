@@ -77,6 +77,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                             item.getContent());
                     intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_TIME,
                             item.getTime());
+                    intent.putStringArrayListExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_IMAGES,
+                            new java.util.ArrayList<>(item.getImages()));
                     v.getContext().startActivity(intent);
                 }
             });
@@ -87,11 +89,14 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             tvAuthor.setText(item.getAuthor().getNickname());
             tvLikes.setText(String.valueOf(item.getLikesCount()));
 
-            // Set random height for staggered effect (optional, better handled by layout
-            // params if needed,
-            // but here we just let image load naturally or set constraints.
-            // For true staggered, image aspect ratio matters.
-            // We'll rely on Glide loading the image and adjustViewBounds=true)
+            // Set random height for staggered effect
+            ViewGroup.LayoutParams params = ivCover.getLayoutParams();
+            if (item.getHeight() > 0) {
+                params.height = item.getHeight();
+            } else {
+                params.height = 400; // Default fallback
+            }
+            ivCover.setLayoutParams(params);
 
             // Use ImageLoader
             ImageLoader.loadRounded(itemView.getContext(), item.getImageUrl(), ivCover, 8);

@@ -47,6 +47,16 @@ public class FeedRepository {
                         "This is the detailed content for feed " + id + ". It describes the moment in detail.",
                         imageUrl, user, random.nextInt(1000), random.nextInt(24) + "h ago");
                 item.setHeight(400 + random.nextInt(200)); // Random height for staggered effect
+
+                // Add more random images for carousel
+                List<String> images = new ArrayList<>();
+                images.add(imageUrl);
+                int imageCount = 2 + random.nextInt(4); // Total 3-6 images
+                for (int j = 0; j < imageCount; j++) {
+                    images.add("https://picsum.photos/400/" + (400 + random.nextInt(200)) + "?random=" + id + "_" + j);
+                }
+                item.setImages(images);
+
                 items.add(item);
             }
             data.setValue(items);
