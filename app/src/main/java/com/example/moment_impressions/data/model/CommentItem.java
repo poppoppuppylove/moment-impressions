@@ -7,6 +7,8 @@ public class CommentItem {
     private String time;
     private int likesCount;
 
+    private boolean isLiked;
+
     public CommentItem(String id, String content, User author, String time, int likesCount) {
         this.id = id;
         this.content = content;
@@ -53,5 +55,13 @@ public class CommentItem {
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
+    }
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
     }
 }

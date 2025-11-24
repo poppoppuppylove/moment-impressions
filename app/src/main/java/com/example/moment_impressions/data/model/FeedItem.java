@@ -9,6 +9,7 @@ public class FeedItem {
     private String imageUrl;
     private User author;
     private int likesCount;
+    private boolean isLiked;
     private int height; // For staggered grid layout simulation
 
     private String content;
@@ -96,6 +97,14 @@ public class FeedItem {
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
+    }
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
     }
 
     public String getContent() {

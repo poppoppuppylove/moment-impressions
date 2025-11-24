@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,6 +37,9 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
     private boolean isLiked = false;
     private boolean isCollected = false;
 
+    private EditText etComment;
+    private ImageView ivSendComment;
+
     @Override
     protected int getLayoutId() {
         return R.layout.activity_detail;
@@ -56,6 +60,8 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         ivLike = findViewById(R.id.iv_like);
         ivCollect = findViewById(R.id.iv_collect);
         recyclerViewComments = findViewById(R.id.recycler_view_comments);
+        etComment = findViewById(R.id.et_comment);
+        ivSendComment = findViewById(R.id.iv_send_comment);
         toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
@@ -70,6 +76,45 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
 
         ivLike.setOnClickListener(v -> toggleLike());
         ivCollect.setOnClickListener(v -> toggleCollect());
+
+        etComment.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                ivSendComment.setVisibility(s.length() > 0 ? android.view.View.VISIBLE : android.view.View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+            }
+        });
+
+        ivSendComment.setOnClickListener(v -> sendComment());
+    }
+
+    private void sendComment() {
+        String content = etComment.getText().toString().trim();
+        if (!content.isEmpty()) {
+            String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
+            if (feedId != null) {
+                viewModel.addComment(feedId, content);
+                etComment.setText("");
+                hideKeyboard();
+                com.example.moment_impressions.core.utils.ToastUtils.showShort(this, "Comment sent");
+            }
+        }
+    }
+
+    private void hideKeyboard() {
+        android.view.View view = this.getCurrentFocus();
+        if (view != null) {
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(
+                    android.content.Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     @Override

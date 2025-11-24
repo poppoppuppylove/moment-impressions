@@ -25,4 +25,18 @@ public class DetailViewModel extends BaseViewModel {
             commentList.setValue(comments);
         });
     }
+
+    public void toggleLike(String feedId, boolean isLiked) {
+        repository.toggleFeedLike(feedId, isLiked);
+    }
+
+    public void addComment(String feedId, String content) {
+        repository.addComment(feedId, content).observeForever(comment -> {
+            List<CommentItem> currentList = commentList.getValue();
+            if (currentList != null) {
+                currentList.add(0, comment);
+                commentList.setValue(currentList);
+            }
+        });
+    }
 }

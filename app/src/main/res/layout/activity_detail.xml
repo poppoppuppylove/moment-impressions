@@ -118,16 +118,30 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp">
 
-        <TextView
+        <EditText
+            android:id="@+id/et_comment"
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:background="#F5F5F5"
-            android:gravity="center_vertical"
+            android:background="@drawable/bg_comment_input"
+            android:hint="@string/detail_say_something"
             android:paddingStart="16dp"
-            android:text="@string/detail_say_something"
-            android:textColor="#999999"
-            android:textSize="12sp" />
+            android:paddingEnd="16dp"
+            android:textColor="#333333"
+            android:textColorHint="#999999"
+            android:textSize="14sp"
+            android:imeOptions="actionSend"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <ImageView
+            android:id="@+id/iv_send_comment"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="12dp"
+            android:src="@android:drawable/ic_menu_send"
+            app:tint="@android:color/black"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/iv_like"

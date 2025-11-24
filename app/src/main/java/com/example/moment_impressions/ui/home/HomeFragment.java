@@ -82,4 +82,12 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
         // Initial load
         viewModel.refresh();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
 }
