@@ -55,6 +55,11 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
         });
 
         refreshLayout.setOnRefreshListener(() -> viewModel.refresh());
+
+        view.findViewById(R.id.fab_add).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(getContext(),
+                    com.example.moment_impressions.ui.publish.PublishActivity.class));
+        });
     }
 
     @Override

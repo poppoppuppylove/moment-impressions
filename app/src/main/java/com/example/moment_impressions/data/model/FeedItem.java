@@ -8,12 +8,29 @@ public class FeedItem {
     private int likesCount;
     private int height; // For staggered grid layout simulation
 
+    private String content;
+    private String time;
+
     public FeedItem(String id, String title, String imageUrl, User author, int likesCount) {
         this.id = id;
         this.title = title;
         this.imageUrl = imageUrl;
         this.author = author;
         this.likesCount = likesCount;
+        this.content = title
+                + " - This is the detailed content of the feed. It contains more information about the topic.";
+        this.time = "2h ago";
+    }
+
+    public FeedItem(String id, String title, String content, String imageUrl, User author, int likesCount,
+            String time) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.author = author;
+        this.likesCount = likesCount;
+        this.time = time;
     }
 
     public String getId() {
@@ -54,6 +71,22 @@ public class FeedItem {
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public int getHeight() {

@@ -46,7 +46,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         return items.size();
     }
 
-    static class FeedViewHolder extends RecyclerView.ViewHolder {
+    class FeedViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCover;
         TextView tvTitle;
         ImageView ivAvatar;
@@ -60,6 +60,26 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
             tvAuthor = itemView.findViewById(R.id.tv_author);
             tvLikes = itemView.findViewById(R.id.tv_likes);
+
+            itemView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    FeedItem item = items.get(position);
+                    android.content.Intent intent = new android.content.Intent(v.getContext(),
+                            com.example.moment_impressions.ui.detail.DetailActivity.class);
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_FEED_ID,
+                            item.getId());
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_IMAGE_URL,
+                            item.getImageUrl());
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_TITLE,
+                            item.getTitle());
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_CONTENT,
+                            item.getContent());
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_TIME,
+                            item.getTime());
+                    v.getContext().startActivity(intent);
+                }
+            });
         }
 
         public void bind(FeedItem item) {

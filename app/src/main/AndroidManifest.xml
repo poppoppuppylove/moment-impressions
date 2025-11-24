@@ -13,6 +13,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Momentimpressions">
+        
+        <activity
+            android:name=".ui.publish.PublishActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Momentimpressions" />
+
+        <activity
+            android:name=".ui.detail.DetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Momentimpressions" />
+            
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">

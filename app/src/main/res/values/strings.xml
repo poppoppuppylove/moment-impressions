@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">moment-impressions</string>
+    <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+    
+    <!-- Publish Page -->
+    <string name="publish_title">Publish</string>
+    <string name="publish_post">Post</string>
+    <string name="publish_publishing">Publishing...</string>
+    <string name="publish_success">Published successfully!</string>
+    <string name="publish_fail">Failed to publish</string>
+    <string name="publish_select_image">Please select an image</string>
+    <string name="publish_enter_title">Please enter a title</string>
+    <string name="publish_hint_title">Title</string>
+    <string name="publish_hint_content">Say something...</string>
+    
+    <!-- Detail Page -->
+    <string name="detail_say_something">Say something...</string>
 </resources>
