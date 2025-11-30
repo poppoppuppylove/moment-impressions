@@ -36,6 +36,8 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
 
         publishLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
+                // 标记刷新状态，确保新发布的帖子在顶部可见
+                refreshLayout.setRefreshing(true);
                 viewModel.refresh();
             }
         });
@@ -48,6 +50,8 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
 
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -69,7 +73,9 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
         view.findViewById(R.id.fab_add).setOnClickListener(v -> {
             android.content.Intent intent = new android.content.Intent(getContext(),
                     com.example.moment_impressions.ui.publish.PublishActivity.class);
-            publishLauncher.launch(intent);
+            androidx.core.app.ActivityOptionsCompat options = androidx.core.app.ActivityOptionsCompat
+                    .makeCustomAnimation(requireContext(), android.R.anim.fade_in, android.R.anim.fade_out);
+            publishLauncher.launch(intent, options);
         });
 
         view.findViewById(R.id.btn_profile).setOnClickListener(v -> {

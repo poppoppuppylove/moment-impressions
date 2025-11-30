@@ -47,4 +47,8 @@ public class DetailViewModel extends BaseViewModel {
     public void toggleFavorite(String feedId, boolean isFavorite) {
         repository.toggleFavorite(feedId, isFavorite);
     }
+
+    public boolean isFavorite(String feedId) {
+        return repository.isFavorite(feedId);
+    }
 }

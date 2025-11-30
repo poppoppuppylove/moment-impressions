@@ -172,6 +172,10 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         }
 
         if (feedId != null) {
+            // 初始化收藏状态并更新图标
+            isCollected = viewModel.isFavorite(feedId);
+            updateCollectUI();
+
             viewModel.loadComments(feedId);
         }
 
@@ -202,17 +206,21 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
 
     private void toggleCollect() {
         isCollected = !isCollected;
-        if (isCollected) {
-            ivCollect.setColorFilter(getResources().getColor(android.R.color.holo_blue_light));
-        } else {
-            ivCollect.setColorFilter(getResources().getColor(android.R.color.black));
-        }
+        updateCollectUI();
 
         String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
         if (feedId != null) {
             viewModel.toggleFavorite(feedId, isCollected);
             com.example.moment_impressions.core.utils.ToastUtils.showShort(this,
                     isCollected ? "已收藏" : "已取消收藏");
+        }
+    }
+
+    private void updateCollectUI() {
+        if (isCollected) {
+            ivCollect.setColorFilter(getResources().getColor(android.R.color.holo_blue_light));
+        } else {
+            ivCollect.setColorFilter(getResources().getColor(android.R.color.black));
         }
     }
 

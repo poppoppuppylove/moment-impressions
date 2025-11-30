@@ -122,8 +122,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             }
             ivCover.setLayoutParams(params);
 
-            // Use ImageLoader
-            ImageLoader.loadRounded(itemView.getContext(), item.getImageUrl(), ivCover, 8);
+            // Use ImageLoader with FitCenter to完整显示封面
+            ImageLoader.loadFitCenterRounded(itemView.getContext(), item.getImageUrl(), ivCover, 8);
             ivCover.setTransitionName("feed_image_" + item.getId());
             ImageLoader.loadRounded(itemView.getContext(), item.getAuthor().getAvatarUrl(), ivAvatar, 16);
         }

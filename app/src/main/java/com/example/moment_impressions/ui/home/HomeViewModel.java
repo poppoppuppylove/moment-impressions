@@ -28,7 +28,14 @@ public class HomeViewModel extends BaseViewModel {
 
     public void refresh() {
         currentPage = 0;
+        // 先本地/模拟加载一页，提高首屏速度
         loadData();
+        // 并行触发网络刷新，成功后再加载一次以合并网络数据
+        repository.refreshFromNetwork().observeForever(success -> {
+            if (success != null && success) {
+                loadData();
+            }
+        });
     }
 
     public void loadMore() {

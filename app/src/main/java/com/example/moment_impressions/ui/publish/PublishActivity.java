@@ -26,13 +26,17 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
 
     private final ActivityResultLauncher<String> pickImages = registerForActivityResult(
             new ActivityResultContracts.GetMultipleContents(), uris -> {
-                selectedImageUris.clear();
                 if (uris != null && !uris.isEmpty()) {
-                    selectedImageUris.addAll(uris);
-                    java.util.List<String> imageStrings = new java.util.ArrayList<>();
-                    for (Uri u : uris) imageStrings.add(u.toString());
-                    previewAdapter.setItems(imageStrings);
-                } else {
+                    // 累加选择结果并去重
+                    java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>();
+                    for (Uri u : selectedImageUris) merged.add(u.toString());
+                    for (Uri u : uris) merged.add(u.toString());
+
+                    selectedImageUris.clear();
+                    for (String s : merged) selectedImageUris.add(Uri.parse(s));
+
+                    previewAdapter.setItems(new java.util.ArrayList<>(merged));
+                } else if (selectedImageUris.isEmpty()) {
                     previewAdapter.setItems(java.util.Collections.emptyList());
                 }
                 updatePublishButtonState();
@@ -62,6 +66,7 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
         previewAdapter = new PublishImageAdapter();
         rvPreview.setLayoutManager(new GridLayoutManager(this, 3));
         rvPreview.setAdapter(previewAdapter);
+        rvPreview.setHasFixedSize(true);
         // 提供两个入口以提升可用性
         rvPreview.setOnClickListener(v -> pickImages.launch("image/*"));
         tvPickImages.setOnClickListener(v -> pickImages.launch("image/*"));
