@@ -12,6 +12,7 @@
     <string name="publish_enter_title">Please enter a title</string>
     <string name="publish_hint_title">Title</string>
     <string name="publish_hint_content">Say something...</string>
+    <string name="publish_pick_images">Pick Images</string>
     
     <!-- Detail Page -->
     <string name="detail_say_something">Say something...</string>

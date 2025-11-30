@@ -20,6 +20,7 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
     private androidx.recyclerview.widget.RecyclerView rvPreview;
     private EditText etTitle;
     private EditText etContent;
+    private android.widget.TextView tvPickImages;
     private java.util.List<Uri> selectedImageUris = new java.util.ArrayList<>();
     private PublishImageAdapter previewAdapter;
 
@@ -54,13 +55,16 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
         rvPreview = findViewById(R.id.rv_preview);
         etTitle = findViewById(R.id.et_title);
         etContent = findViewById(R.id.et_content);
+        tvPickImages = findViewById(R.id.tv_pick_images);
 
         ivClose.setOnClickListener(v -> finish());
 
         previewAdapter = new PublishImageAdapter();
         rvPreview.setLayoutManager(new GridLayoutManager(this, 3));
         rvPreview.setAdapter(previewAdapter);
+        // 提供两个入口以提升可用性
         rvPreview.setOnClickListener(v -> pickImages.launch("image/*"));
+        tvPickImages.setOnClickListener(v -> pickImages.launch("image/*"));
 
         etTitle.addTextChangedListener(new android.text.TextWatcher() {
             @Override

@@ -23,8 +23,9 @@ public class FeedRepository {
     private final List<FeedItem> favoritesList = new ArrayList<>(); // Favorite posts
     private final Map<String, List<CommentItem>> commentCache = new HashMap<>();
 
-    // Use local sample image for all demo items
-    private static final String LOCAL_SAMPLE_IMAGE = "file:///D:/MyHome/momentimpressions/2025109212058.jpg";
+    // Use packaged drawable resource for demo items (accessible on device)
+    // Glide supports android.resource URIs. This ensures images render on list/detail pages.
+    private static final String LOCAL_SAMPLE_IMAGE = "android.resource://com.example.moment_impressions/drawable/sample_cover";
 
     private FeedRepository() {
         // Initialize mock data
