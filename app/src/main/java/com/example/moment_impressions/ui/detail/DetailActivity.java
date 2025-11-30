@@ -22,12 +22,16 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
     public static final String EXTRA_TITLE = "extra_title";
     public static final String EXTRA_CONTENT = "extra_content";
     public static final String EXTRA_TIME = "extra_time";
+    public static final String EXTRA_AUTHOR_NAME = "extra_author_name";
+    public static final String EXTRA_AUTHOR_AVATAR = "extra_author_avatar";
 
     private androidx.viewpager2.widget.ViewPager2 viewPagerImages;
     private TextView tvImageIndicator;
     private TextView tvDetailTitle;
     private TextView tvDetailContent;
     private TextView tvDetailTime;
+    private ImageView ivAuthorAvatar;
+    private TextView tvAuthorNickname;
     private ImageView ivLike;
     private ImageView ivCollect;
     private RecyclerView recyclerViewComments;
@@ -57,6 +61,8 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         tvDetailTitle = findViewById(R.id.tv_detail_title);
         tvDetailContent = findViewById(R.id.tv_detail_content);
         tvDetailTime = findViewById(R.id.tv_detail_time);
+        ivAuthorAvatar = findViewById(R.id.iv_author_avatar);
+        tvAuthorNickname = findViewById(R.id.tv_author_nickname);
         ivLike = findViewById(R.id.iv_like);
         ivCollect = findViewById(R.id.iv_collect);
         recyclerViewComments = findViewById(R.id.recycler_view_comments);
@@ -125,6 +131,8 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         String title = getIntent().getStringExtra(EXTRA_TITLE);
         String content = getIntent().getStringExtra(EXTRA_CONTENT);
         String time = getIntent().getStringExtra(EXTRA_TIME);
+        String authorName = getIntent().getStringExtra(EXTRA_AUTHOR_NAME);
+        String authorAvatar = getIntent().getStringExtra(EXTRA_AUTHOR_AVATAR);
 
         com.example.moment_impressions.ui.detail.adapter.ImagePagerAdapter imageAdapter = new com.example.moment_impressions.ui.detail.adapter.ImagePagerAdapter();
         viewPagerImages.setAdapter(imageAdapter);
@@ -156,6 +164,12 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
         if (time != null) {
             tvDetailTime.setText(time);
         }
+        if (authorName != null) {
+            tvAuthorNickname.setText(authorName);
+        }
+        if (authorAvatar != null && !authorAvatar.isEmpty()) {
+            ImageLoader.loadRounded(this, authorAvatar, ivAuthorAvatar, 16);
+        }
 
         if (feedId != null) {
             viewModel.loadComments(feedId);
@@ -179,6 +193,11 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
             ivLike.setImageResource(android.R.drawable.btn_star);
             ivLike.setColorFilter(getResources().getColor(android.R.color.black));
         }
+
+        String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
+        if (feedId != null) {
+            viewModel.toggleLike(feedId, isLiked);
+        }
     }
 
     private void toggleCollect() {
@@ -187,6 +206,13 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
             ivCollect.setColorFilter(getResources().getColor(android.R.color.holo_blue_light));
         } else {
             ivCollect.setColorFilter(getResources().getColor(android.R.color.black));
+        }
+
+        String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
+        if (feedId != null) {
+            viewModel.toggleFavorite(feedId, isCollected);
+            com.example.moment_impressions.core.utils.ToastUtils.showShort(this,
+                    isCollected ? "已收藏" : "已取消收藏");
         }
     }
 

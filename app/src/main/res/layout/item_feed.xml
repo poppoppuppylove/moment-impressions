@@ -60,6 +60,7 @@
                 android:textSize="10sp" />
 
             <ImageView
+                android:id="@+id/iv_like_indicator"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
                 android:src="@android:drawable/btn_star"

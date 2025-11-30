@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import com.example.moment_impressions.R;
@@ -16,18 +17,24 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
 
     private ImageView ivClose;
     private Button btnPublish;
-    private ImageView ivPreview;
+    private androidx.recyclerview.widget.RecyclerView rvPreview;
     private EditText etTitle;
     private EditText etContent;
+    private java.util.List<Uri> selectedImageUris = new java.util.ArrayList<>();
+    private PublishImageAdapter previewAdapter;
 
-    private Uri selectedImageUri;
-
-    private final ActivityResultLauncher<String> pickImage = registerForActivityResult(
-            new ActivityResultContracts.GetContent(), uri -> {
-                if (uri != null) {
-                    selectedImageUri = uri;
-                    ImageLoader.load(this, uri.toString(), ivPreview);
+    private final ActivityResultLauncher<String> pickImages = registerForActivityResult(
+            new ActivityResultContracts.GetMultipleContents(), uris -> {
+                selectedImageUris.clear();
+                if (uris != null && !uris.isEmpty()) {
+                    selectedImageUris.addAll(uris);
+                    java.util.List<String> imageStrings = new java.util.ArrayList<>();
+                    for (Uri u : uris) imageStrings.add(u.toString());
+                    previewAdapter.setItems(imageStrings);
+                } else {
+                    previewAdapter.setItems(java.util.Collections.emptyList());
                 }
+                updatePublishButtonState();
             });
 
     @Override
@@ -44,46 +51,76 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
     protected void initView() {
         ivClose = findViewById(R.id.iv_close);
         btnPublish = findViewById(R.id.btn_publish);
-        ivPreview = findViewById(R.id.iv_preview);
+        rvPreview = findViewById(R.id.rv_preview);
         etTitle = findViewById(R.id.et_title);
         etContent = findViewById(R.id.et_content);
 
         ivClose.setOnClickListener(v -> finish());
 
-        ivPreview.setOnClickListener(v -> pickImage.launch("image/*"));
+        previewAdapter = new PublishImageAdapter();
+        rvPreview.setLayoutManager(new GridLayoutManager(this, 3));
+        rvPreview.setAdapter(previewAdapter);
+        rvPreview.setOnClickListener(v -> pickImages.launch("image/*"));
+
+        etTitle.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updatePublishButtonState();
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         btnPublish.setOnClickListener(v -> {
             String title = etTitle.getText().toString().trim();
             String content = etContent.getText().toString().trim();
 
-            if (selectedImageUri == null) {
-                ToastUtils.showShort(this, getString(R.string.publish_select_image));
+            if (!btnPublish.isEnabled()) {
+                // 双保险：按钮未激活时给予提示
+                if (selectedImageUris == null || selectedImageUris.isEmpty()) {
+                    ToastUtils.showShort(this, getString(R.string.publish_select_image));
+                } else {
+                    ToastUtils.showShort(this, getString(R.string.publish_enter_title));
+                }
                 return;
             }
-            if (title.isEmpty()) {
-                ToastUtils.showShort(this, getString(R.string.publish_enter_title));
-                return;
+            java.util.List<String> imageUris = new java.util.ArrayList<>();
+            for (Uri uri : selectedImageUris) {
+                imageUris.add(uri.toString());
             }
-
-            viewModel.publish(title, content, selectedImageUri.toString());
+            viewModel.setSelectedImages(imageUris);
+            viewModel.publish(title, content, imageUris);
         });
     }
 
     @Override
     protected void initData() {
         viewModel.getIsPublishing().observe(this, isPublishing -> {
-            btnPublish.setEnabled(!isPublishing);
-            btnPublish
-                    .setText(isPublishing ? getString(R.string.publish_publishing) : getString(R.string.publish_post));
+            btnPublish.setText(isPublishing ? getString(R.string.publish_publishing) : getString(R.string.publish_post));
+            updatePublishButtonState();
         });
 
         viewModel.getPublishSuccess().observe(this, success -> {
             if (success) {
                 ToastUtils.showShort(this, getString(R.string.publish_success));
+                setResult(android.app.Activity.RESULT_OK);
                 finish();
             } else {
                 ToastUtils.showShort(this, getString(R.string.publish_fail));
             }
         });
+
+        updatePublishButtonState();
+    }
+
+    private void updatePublishButtonState() {
+        boolean hasImages = selectedImageUris != null && !selectedImageUris.isEmpty();
+        boolean hasTitle = etTitle.getText() != null && !etTitle.getText().toString().trim().isEmpty();
+        boolean isPublishing = viewModel.getIsPublishing().getValue() != null && viewModel.getIsPublishing().getValue();
+        btnPublish.setEnabled(hasImages && hasTitle && !isPublishing);
     }
 }

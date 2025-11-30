@@ -36,14 +36,13 @@
             android:textAllCaps="false" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/iv_preview"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_preview"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginTop="16dp"
-        android:background="#EEEEEE"
-        android:scaleType="centerCrop"
-        android:src="@android:drawable/ic_menu_camera" />
+        android:clipToPadding="false"
+        android:padding="2dp" />
 
     <EditText
         android:id="@+id/et_title"

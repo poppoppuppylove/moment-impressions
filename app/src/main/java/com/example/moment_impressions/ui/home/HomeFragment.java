@@ -1,6 +1,9 @@
 package com.example.moment_impressions.ui.home;
 
+import android.app.Activity;
 import android.view.View;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -14,6 +17,7 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
     private FeedAdapter adapter;
+    private ActivityResultLauncher<android.content.Intent> publishLauncher;
 
     @Override
     protected int getLayoutId() {
@@ -29,6 +33,12 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
     protected void initView(View view) {
         recyclerView = view.findViewById(R.id.recycler_view);
         refreshLayout = view.findViewById(R.id.refresh_layout);
+
+        publishLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                viewModel.refresh();
+            }
+        });
 
         adapter = new FeedAdapter();
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2,
@@ -57,8 +67,19 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
         refreshLayout.setOnRefreshListener(() -> viewModel.refresh());
 
         view.findViewById(R.id.fab_add).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(getContext(),
-                    com.example.moment_impressions.ui.publish.PublishActivity.class));
+            android.content.Intent intent = new android.content.Intent(getContext(),
+                    com.example.moment_impressions.ui.publish.PublishActivity.class);
+            publishLauncher.launch(intent);
+        });
+
+        view.findViewById(R.id.btn_profile).setOnClickListener(v -> {
+            com.example.moment_impressions.ui.profile.ProfileFragment profileFragment =
+                    new com.example.moment_impressions.ui.profile.ProfileFragment();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(android.R.id.content, profileFragment)
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
@@ -68,6 +89,7 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
             if (refreshLayout.isRefreshing()) {
                 adapter.setItems(items);
                 refreshLayout.setRefreshing(false);
+                recyclerView.scrollToPosition(0);
             } else {
                 adapter.addItems(items);
             }

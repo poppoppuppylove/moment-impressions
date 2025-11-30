@@ -30,6 +30,10 @@ public class DetailViewModel extends BaseViewModel {
         repository.toggleFeedLike(feedId, isLiked);
     }
 
+    public void toggleCommentLike(String feedId, String commentId, boolean isLiked) {
+        repository.toggleCommentLike(feedId, commentId, isLiked);
+    }
+
     public void addComment(String feedId, String content) {
         repository.addComment(feedId, content).observeForever(comment -> {
             List<CommentItem> currentList = commentList.getValue();
@@ -38,5 +42,9 @@ public class DetailViewModel extends BaseViewModel {
                 commentList.setValue(currentList);
             }
         });
+    }
+
+    public void toggleFavorite(String feedId, boolean isFavorite) {
+        repository.toggleFavorite(feedId, isFavorite);
     }
 }

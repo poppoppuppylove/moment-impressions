@@ -52,6 +52,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         ImageView ivAvatar;
         TextView tvAuthor;
         TextView tvLikes;
+        ImageView ivLikeIndicator;
 
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -60,6 +61,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
             tvAuthor = itemView.findViewById(R.id.tv_author);
             tvLikes = itemView.findViewById(R.id.tv_likes);
+            ivLikeIndicator = itemView.findViewById(R.id.iv_like_indicator);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -79,7 +81,18 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                             item.getTime());
                     intent.putStringArrayListExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_IMAGES,
                             new java.util.ArrayList<>(item.getImages()));
-                    v.getContext().startActivity(intent);
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_AUTHOR_NAME,
+                            item.getAuthor().getNickname());
+                    intent.putExtra(com.example.moment_impressions.ui.detail.DetailActivity.EXTRA_AUTHOR_AVATAR,
+                            item.getAuthor().getAvatarUrl());
+
+                    String transitionName = "feed_image_" + item.getId();
+                    intent.putExtra("extra_transition_name", transitionName);
+
+                    androidx.core.app.ActivityOptionsCompat options = androidx.core.app.ActivityOptionsCompat
+                            .makeSceneTransitionAnimation((android.app.Activity) v.getContext(), ivCover,
+                                    transitionName);
+                    v.getContext().startActivity(intent, options.toBundle());
                 }
             });
         }
@@ -88,6 +101,17 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             tvTitle.setText(item.getTitle());
             tvAuthor.setText(item.getAuthor().getNickname());
             tvLikes.setText(String.valueOf(item.getLikesCount()));
+
+            // 点赞标识高亮
+            if (ivLikeIndicator != null) {
+                if (item.isLiked()) {
+                    ivLikeIndicator.setImageResource(android.R.drawable.btn_star_big_on);
+                    ivLikeIndicator.setColorFilter(itemView.getResources().getColor(android.R.color.holo_orange_light));
+                } else {
+                    ivLikeIndicator.setImageResource(android.R.drawable.btn_star);
+                    ivLikeIndicator.setColorFilter(itemView.getResources().getColor(android.R.color.darker_gray));
+                }
+            }
 
             // Set random height for staggered effect
             ViewGroup.LayoutParams params = ivCover.getLayoutParams();
@@ -100,6 +124,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
             // Use ImageLoader
             ImageLoader.loadRounded(itemView.getContext(), item.getImageUrl(), ivCover, 8);
+            ivCover.setTransitionName("feed_image_" + item.getId());
             ImageLoader.loadRounded(itemView.getContext(), item.getAuthor().getAvatarUrl(), ivAvatar, 16);
         }
     }
