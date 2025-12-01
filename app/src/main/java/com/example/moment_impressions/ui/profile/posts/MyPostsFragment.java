@@ -42,4 +42,12 @@ public class MyPostsFragment extends BaseFragment<MyPostsViewModel> {
         });
         viewModel.load("me");
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
 }

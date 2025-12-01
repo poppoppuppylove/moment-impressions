@@ -109,7 +109,7 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
                 viewModel.addComment(feedId, content);
                 etComment.setText("");
                 hideKeyboard();
-                com.example.moment_impressions.core.utils.ToastUtils.showShort(this, "Comment sent");
+                com.example.moment_impressions.core.utils.ToastUtils.showShort(this, "评论已发送");
             }
         }
     }
@@ -176,6 +176,10 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
             isCollected = viewModel.isFavorite(feedId);
             updateCollectUI();
 
+            // 初始化点赞状态并更新图标
+            isLiked = viewModel.isLiked(feedId);
+            updateLikeUI();
+
             viewModel.loadComments(feedId);
         }
 
@@ -190,17 +194,21 @@ public class DetailActivity extends BaseActivity<DetailViewModel> {
 
     private void toggleLike() {
         isLiked = !isLiked;
+        updateLikeUI();
+
+        String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
+        if (feedId != null) {
+            viewModel.toggleLike(feedId, isLiked);
+        }
+    }
+
+    private void updateLikeUI() {
         if (isLiked) {
             ivLike.setImageResource(android.R.drawable.btn_star_big_on);
             ivLike.setColorFilter(getResources().getColor(android.R.color.holo_orange_light));
         } else {
             ivLike.setImageResource(android.R.drawable.btn_star);
             ivLike.setColorFilter(getResources().getColor(android.R.color.black));
-        }
-
-        String feedId = getIntent().getStringExtra(EXTRA_FEED_ID);
-        if (feedId != null) {
-            viewModel.toggleLike(feedId, isLiked);
         }
     }
 

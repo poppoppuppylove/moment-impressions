@@ -1,0 +1,112 @@
+[
+  {
+    "id": "c1",
+    "content": "拍得真不错！景色太美了。",
+    "user": {
+      "id": "u_c1",
+      "nickname": "摄影爱好者",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c1"
+    },
+    "time": "1小时前",
+    "likesCount": 12
+  },
+  {
+    "id": "c2",
+    "content": "哇，我也好想去这里看看！",
+    "user": {
+      "id": "u_c2",
+      "nickname": "旅行达人",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c2"
+    },
+    "time": "2小时前",
+    "likesCount": 8
+  },
+  {
+    "id": "c3",
+    "content": "楼主拍得很有感觉，构图很棒。",
+    "user": {
+      "id": "u_c3",
+      "nickname": "光影猎手",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c3"
+    },
+    "time": "30分钟前",
+    "likesCount": 5
+  },
+  {
+    "id": "c4",
+    "content": "期待更多更新！",
+    "user": {
+      "id": "u_c4",
+      "nickname": "快乐小狗",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c4"
+    },
+    "time": "5分钟前",
+    "likesCount": 2
+  },
+  {
+    "id": "c5",
+    "content": "这照片简直可以直接当壁纸了！",
+    "user": {
+      "id": "u_c5",
+      "nickname": "壁纸控",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c5"
+    },
+    "time": "1天前",
+    "likesCount": 45
+  },
+  {
+    "id": "c6",
+    "content": "生活就该这样惬意。",
+    "user": {
+      "id": "u_c6",
+      "nickname": "悠闲生活",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c6"
+    },
+    "time": "3小时前",
+    "likesCount": 15
+  },
+  {
+    "id": "c7",
+    "content": "太赞了，必须点赞！",
+    "user": {
+      "id": "u_c7",
+      "nickname": "点赞狂魔",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c7"
+    },
+    "time": "刚刚",
+    "likesCount": 1
+  },
+  {
+    "id": "c8",
+    "content": "这是用什么相机拍的呀？",
+    "user": {
+      "id": "u_c8",
+      "nickname": "器材党",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c8"
+    },
+    "time": "4小时前",
+    "likesCount": 3
+  },
+  {
+    "id": "c9",
+    "content": "看了心情变好了。",
+    "user": {
+      "id": "u_c9",
+      "nickname": "治愈系",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c9"
+    },
+    "time": "6小时前",
+    "likesCount": 22
+  },
+  {
+    "id": "c10",
+    "content": "虽然不知道在哪里，但感觉很棒。",
+    "user": {
+      "id": "u_c10",
+      "nickname": "路人甲",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/png?seed=c10"
+    },
+    "time": "10分钟前",
+    "likesCount": 0
+  }
+]

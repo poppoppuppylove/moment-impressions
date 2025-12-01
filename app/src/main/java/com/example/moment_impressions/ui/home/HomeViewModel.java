@@ -54,18 +54,20 @@ public class HomeViewModel extends BaseViewModel {
         repository.getFeedList(currentPage).observeForever(items -> {
             isLoading.setValue(false);
             if (items != null) {
-                // If refreshing (page 0), replace list. If loading more, append (handled by UI
-                // observing change,
-                // but here we are just emitting the chunk. The UI/Adapter should handle append?
-                // Or ViewModel maintains the full list?
-                // Better: ViewModel emits the *new* chunk or the *full* list.
-                // Let's emit the chunk and let UI handle it, OR emit full list.
-                // Given the Adapter has `addItems` and `setItems`, let's try to be smart.
-                // But LiveData usually holds the state.
-                // Let's just emit the chunk for now as per Repository design.
-                // Wait, if I emit chunk, rotation will lose data if I don't save it.
-                // But for this simple demo, let's just emit the chunk.
-                feedList.setValue(items);
+                // If refreshing (page 0), replace list. If loading more, append.
+                if (currentPage == 0) {
+                     feedList.setValue(items);
+                } else {
+                     List<FeedItem> current = feedList.getValue();
+                     if (current != null) {
+                         // Avoid simple addAll to prevent duplicates if Repository returns overlap
+                         // For now, just append.
+                         current.addAll(items);
+                         feedList.setValue(current);
+                     } else {
+                         feedList.setValue(items);
+                     }
+                }
             }
         });
     }

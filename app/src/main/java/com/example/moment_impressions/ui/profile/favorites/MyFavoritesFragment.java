@@ -39,4 +39,13 @@ public class MyFavoritesFragment extends BaseFragment<MyFavoritesViewModel> {
         });
         viewModel.load("me");
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Reload to remove un-favorited items
+        if (viewModel != null) {
+            viewModel.load("me");
+        }
+    }
 }

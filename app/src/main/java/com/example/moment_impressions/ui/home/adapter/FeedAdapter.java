@@ -89,12 +89,27 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                     String transitionName = "feed_image_" + item.getId();
                     intent.putExtra("extra_transition_name", transitionName);
 
-                    androidx.core.app.ActivityOptionsCompat options = androidx.core.app.ActivityOptionsCompat
-                            .makeSceneTransitionAnimation((android.app.Activity) v.getContext(), ivCover,
-                                    transitionName);
-                    v.getContext().startActivity(intent, options.toBundle());
+                    android.app.Activity activity = getActivityFromView(v);
+                    if (activity != null) {
+                        androidx.core.app.ActivityOptionsCompat options = androidx.core.app.ActivityOptionsCompat
+                                .makeSceneTransitionAnimation(activity, ivCover, transitionName);
+                        v.getContext().startActivity(intent, options.toBundle());
+                    } else {
+                        v.getContext().startActivity(intent);
+                    }
                 }
             });
+        }
+
+        private android.app.Activity getActivityFromView(View view) {
+            android.content.Context context = view.getContext();
+            while (context instanceof android.content.ContextWrapper) {
+                if (context instanceof android.app.Activity) {
+                    return (android.app.Activity) context;
+                }
+                context = ((android.content.ContextWrapper) context).getBaseContext();
+            }
+            return null;
         }
 
         public void bind(FeedItem item) {
@@ -122,8 +137,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             }
             ivCover.setLayoutParams(params);
 
-            // Use ImageLoader with FitCenter to完整显示封面
-            ImageLoader.loadFitCenterRounded(itemView.getContext(), item.getImageUrl(), ivCover, 8);
+            // Use ImageLoader with Rounded (CenterCrop) to fill the space without white gaps
+            ImageLoader.loadRounded(itemView.getContext(), item.getImageUrl(), ivCover, 8);
             ivCover.setTransitionName("feed_image_" + item.getId());
             ImageLoader.loadRounded(itemView.getContext(), item.getAuthor().getAvatarUrl(), ivAvatar, 16);
         }

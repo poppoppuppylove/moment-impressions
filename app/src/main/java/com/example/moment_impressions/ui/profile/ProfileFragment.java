@@ -62,6 +62,7 @@ public class ProfileFragment extends BaseFragment<ProfileViewModel> {
     protected void initData() {
         // 绑定用户信息与获赞数
         tvNickname.setText("Me");
+        // Use a local resource or a reliable placeholder
         String avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=me";
         ImageLoader.loadRounded(requireContext(), avatarUrl, ivAvatar, 16);
 

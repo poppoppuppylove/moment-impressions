@@ -21,27 +21,95 @@ public class FeedRepository {
     private final List<FeedItem> localCache = new ArrayList<>(); // For newly published items
     private final List<FeedItem> myPosts = new ArrayList<>(); // User's own posts
     private final List<FeedItem> favoritesList = new ArrayList<>(); // Favorite posts
+    private final List<CommentItem> commentPool = new ArrayList<>();
     private final Map<String, List<CommentItem>> commentCache = new HashMap<>();
     private final Object lock = new Object(); // 读写安全锁
 
     // 打包资源示例（备用）
-    private static final String LOCAL_SAMPLE_IMAGE = "android.resource://com.example.moment_impressions/drawable/sample_cover";
+    private static final String LOCAL_SAMPLE_IMAGE = "android.resource://com.example.moment_impressions/drawable/img_01";
+    private static final String LOCAL_AVATAR_1 = "android.resource://com.example.moment_impressions/mipmap/ic_launcher";
+    private static final String LOCAL_AVATAR_2 = "android.resource://com.example.moment_impressions/mipmap/ic_launcher_round";
+
     // 虚拟机设备图片路径（用户提供）
     private static final String DEVICE_IMAGE_1 = "/storage/self/primary/Android/data/下载.jpg";
-    private static final String DEVICE_IMAGE_2 = "/storage/self/primary/Android/data/【李惠利】💻电脑壁纸 聚光杂志系列桌布_4_泰兰德壁纸bot_来自小红书网页版.jpg";
+    // PC 路径 (仅作记录，Android 中无法直接访问)
+    // private static final String DEVICE_IMAGE_PC = "D:\\MyHome\\momentimpressions\\1112.jpg";
 
     private FeedRepository() {
+        loadMockData();
+        loadCommentsMockData();
+    }
+
+    private void loadCommentsMockData() {
+        try {
+            android.content.Context context = com.example.moment_impressions.core.base.BaseApplication.getContext();
+            java.io.InputStream is = context.getAssets().open("comments.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String json = new String(buffer, "UTF-8");
+            
+            com.google.gson.Gson gson = new com.google.gson.Gson();
+            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<CommentItem>>(){}.getType();
+            List<CommentItem> items = gson.fromJson(json, listType);
+            if (items != null) {
+                commentPool.addAll(items);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadMockData() {
+        try {
+            android.content.Context context = com.example.moment_impressions.core.base.BaseApplication.getContext();
+            java.io.InputStream is = context.getAssets().open("feeds.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String json = new String(buffer, "UTF-8");
+            
+            com.google.gson.Gson gson = new com.google.gson.Gson();
+            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<FeedItem>>(){}.getType();
+            List<FeedItem> items = gson.fromJson(json, listType);
+            
+            if (items != null) {
+                for (FeedItem item : items) {
+                   if (item.getImages() == null || item.getImages().isEmpty()) {
+                        List<String> images = new ArrayList<>();
+                        images.add(item.getImageUrl());
+                        item.setImages(images);
+                    }
+                   // 使用 Dicebear 生成随机头像，确保多样性
+                   String seed = item.getAuthor().getId();
+                   if (seed == null) seed = item.getId();
+                   item.getAuthor().setAvatarUrl("https://api.dicebear.com/7.x/avataaars/png?seed=" + seed);
+                }
+                allFeeds.addAll(items);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback to code-generated mock data if JSON fails
+            generateFallbackData();
+        }
+    }
+
+    private void generateFallbackData() {
         // Initialize mock data
         for (int i = 0; i < 20; i++) {
             String id = String.valueOf(i);
-            User user = new User("u" + id, "User " + id, "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
+            // 使用 Dicebear 生成随机头像
+            User user = new User("u" + id, "用户" + id, "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
 
             // 使用打包资源示例图片作为封面，确保任意设备可正常显示
-            String imageUrl = LOCAL_SAMPLE_IMAGE;
+            // 偶数项尝试使用用户提供的本地路径 (如果存在)
+            String imageUrl = (i % 2 == 0) ? DEVICE_IMAGE_1 : LOCAL_SAMPLE_IMAGE;
 
-            FeedItem item = new FeedItem(id, "Title " + id,
-                    "This is the detailed content for feed " + id + ". It describes the moment in detail.",
-                    imageUrl, user, random.nextInt(1000), random.nextInt(24) + "h ago");
+            FeedItem item = new FeedItem(id, "标题 " + id,
+                    "这是帖子 " + id + " 的详细内容。描述了这个精彩瞬间。",
+                    imageUrl, user, random.nextInt(1000), random.nextInt(24) + "小时前");
             item.setHeight(400 + random.nextInt(200)); // Random height for staggered effect
 
             // 为轮播添加更多图片（统一使用资源URI，避免设备路径不可读）
@@ -158,13 +226,28 @@ public class FeedRepository {
                     items = commentCache.get(feedId);
                 } else {
                     items = new ArrayList<>();
-                    for (int i = 0; i < 5; i++) {
-                        String id = feedId + "_c_" + i;
-                        User user = new User("u" + id, "User " + i,
-                                "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
-                        items.add(new CommentItem(id,
-                                "This is a comment " + i + " for feed " + feedId,
-                                user, "1h ago", random.nextInt(100)));
+                    if (!commentPool.isEmpty()) {
+                        int count = 3 + random.nextInt(5); // 3 to 7 comments
+                        for (int i = 0; i < count; i++) {
+                            CommentItem original = commentPool.get(random.nextInt(commentPool.size()));
+                            // Clone or create new to avoid shared state issues if needed, but for read-only display it's fine.
+                            // However, we need unique IDs if we plan to like them individually per feed.
+                            // So let's create a copy with a unique ID.
+                            String id = feedId + "_c_" + i + "_" + System.currentTimeMillis();
+                            items.add(new CommentItem(id, original.getContent(), original.getAuthor(), original.getTime(), original.getLikesCount()));
+                        }
+                    } else {
+                         // Fallback if pool is empty
+                        String[] comments = {
+                            "拍得真不错！", "太美了！", "下次我也要去。", "这是在哪里呀？", "光影效果很棒！", "我也想学摄影。", "楼主好厉害！", "太有感觉了！", "赞赞赞！", "期待更多作品！"
+                        };
+                        for (int i = 0; i < 5; i++) {
+                            String id = feedId + "_c_" + i;
+                            User user = new User("u" + id, "评论用户" + i, "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
+                            items.add(new CommentItem(id,
+                                    comments[random.nextInt(comments.length)] + " " + i,
+                                    user, "1小时前", random.nextInt(100)));
+                        }
                     }
                     commentCache.put(feedId, items);
                 }
@@ -189,32 +272,25 @@ public class FeedRepository {
 
     public void toggleFeedLike(String feedId, boolean isLiked) {
         synchronized (lock) {
+            java.util.Set<FeedItem> itemsToUpdate = new java.util.HashSet<>();
             for (FeedItem item : allFeeds) {
-                if (item.getId().equals(feedId)) {
-                    item.setLiked(isLiked);
-                    item.setLikesCount(isLiked ? item.getLikesCount() + 1 : item.getLikesCount() - 1);
-                    break;
-                }
+                if (item.getId().equals(feedId)) itemsToUpdate.add(item);
             }
             for (FeedItem item : localCache) {
-                if (item.getId().equals(feedId)) {
-                    item.setLiked(isLiked);
-                    item.setLikesCount(isLiked ? item.getLikesCount() + 1 : item.getLikesCount() - 1);
-                    break;
-                }
+                if (item.getId().equals(feedId)) itemsToUpdate.add(item);
             }
             for (FeedItem item : myPosts) {
-                if (item.getId().equals(feedId)) {
-                    item.setLiked(isLiked);
-                    item.setLikesCount(isLiked ? item.getLikesCount() + 1 : item.getLikesCount() - 1);
-                    break;
-                }
+                if (item.getId().equals(feedId)) itemsToUpdate.add(item);
             }
             for (FeedItem item : favoritesList) {
-                if (item.getId().equals(feedId)) {
+                if (item.getId().equals(feedId)) itemsToUpdate.add(item);
+            }
+
+            for (FeedItem item : itemsToUpdate) {
+                // Only update if the state is actually changing to avoid double counting
+                if (item.isLiked() != isLiked) {
                     item.setLiked(isLiked);
                     item.setLikesCount(isLiked ? item.getLikesCount() + 1 : item.getLikesCount() - 1);
-                    break;
                 }
             }
         }
@@ -258,8 +334,8 @@ public class FeedRepository {
     public LiveData<CommentItem> addComment(String feedId, String content) {
         MutableLiveData<CommentItem> result = new MutableLiveData<>();
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            User currentUser = new User("me", "Me", "https://api.dicebear.com/7.x/avataaars/png?seed=me");
-            CommentItem comment = new CommentItem("new_" + System.currentTimeMillis(), content, currentUser, "Just now",
+            User currentUser = new User("me", "我", "https://api.dicebear.com/7.x/avataaars/png?seed=me");
+            CommentItem comment = new CommentItem("new_" + System.currentTimeMillis(), content, currentUser, "刚刚",
                     0);
 
             synchronized (lock) {
@@ -274,6 +350,16 @@ public class FeedRepository {
             result.setValue(comment);
         }, 400);
         return result;
+    }
+
+    public boolean isLiked(String feedId) {
+        synchronized (lock) {
+            for (FeedItem f : allFeeds) { if (f.getId().equals(feedId)) return f.isLiked(); }
+            for (FeedItem f : localCache) { if (f.getId().equals(feedId)) return f.isLiked(); }
+            for (FeedItem f : myPosts) { if (f.getId().equals(feedId)) return f.isLiked(); }
+            for (FeedItem f : favoritesList) { if (f.getId().equals(feedId)) return f.isLiked(); }
+            return false;
+        }
     }
 
     // 查询是否已收藏，用于详情页初始状态展示

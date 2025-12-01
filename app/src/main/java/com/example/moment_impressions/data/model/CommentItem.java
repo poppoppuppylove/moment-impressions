@@ -3,6 +3,7 @@ package com.example.moment_impressions.data.model;
 public class CommentItem {
     private String id;
     private String content;
+    @com.google.gson.annotations.SerializedName("user")
     private User author;
     private String time;
     private int likesCount;

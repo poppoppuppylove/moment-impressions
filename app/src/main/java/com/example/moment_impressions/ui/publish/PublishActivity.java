@@ -99,7 +99,13 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
             }
             java.util.List<String> imageUris = new java.util.ArrayList<>();
             for (Uri uri : selectedImageUris) {
-                imageUris.add(uri.toString());
+                // Copy to cache to ensure persistence and accessibility
+                String path = copyUriToCache(uri);
+                if (path != null) {
+                    imageUris.add("file://" + path);
+                } else {
+                    imageUris.add(uri.toString());
+                }
             }
             viewModel.setSelectedImages(imageUris);
             viewModel.publish(title, content, imageUris);
@@ -131,5 +137,29 @@ public class PublishActivity extends BaseActivity<PublishViewModel> {
         boolean hasTitle = etTitle.getText() != null && !etTitle.getText().toString().trim().isEmpty();
         boolean isPublishing = viewModel.getIsPublishing().getValue() != null && viewModel.getIsPublishing().getValue();
         btnPublish.setEnabled(hasImages && hasTitle && !isPublishing);
+    }
+
+    private String copyUriToCache(Uri uri) {
+        try {
+            java.io.InputStream is = getContentResolver().openInputStream(uri);
+            java.io.File cacheDir = getExternalCacheDir();
+            if (cacheDir == null) cacheDir = getCacheDir();
+            
+            String fileName = "published_" + System.currentTimeMillis() + "_" + java.util.UUID.randomUUID().toString() + ".jpg";
+            java.io.File file = new java.io.File(cacheDir, fileName);
+            java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
+            
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, len);
+            }
+            fos.close();
+            is.close();
+            return file.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -67,12 +67,18 @@ public class ImageLoader {
     private static Object buildModel(String url) {
         if (url == null) return null;
         String lower = url.toLowerCase();
-        if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("content://")
-                || lower.startsWith("android.resource://") || lower.startsWith("file://")) {
+        if (lower.startsWith("http://") || lower.startsWith("https://")) {
             return url;
         }
-        if (lower.startsWith("/storage/") || lower.startsWith("/sdcard/") || lower.startsWith("/mnt/")) {
-            return Uri.fromFile(new File(url));
+        // Handle content://, file://, android.resource:// and local paths as Uri
+        if (lower.startsWith("content://") || lower.startsWith("file://") || 
+            lower.startsWith("android.resource://") || 
+            lower.startsWith("/storage/") || lower.startsWith("/sdcard/") || lower.startsWith("/mnt/")) {
+            
+            if (lower.startsWith("/")) {
+                return Uri.fromFile(new File(url));
+            }
+            return Uri.parse(url);
         }
         return url;
     }

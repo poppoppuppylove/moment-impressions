@@ -92,18 +92,21 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
     @Override
     protected void initData() {
         viewModel.getFeedList().observe(getViewLifecycleOwner(), items -> {
+            if (items == null) return;
+            
+            // If it's a refresh (or initial load), items will contain the full list or first page.
+            // Since ViewModel now manages the full list for pagination, we just set it.
+            // However, Adapter.setItems triggers a full refresh.
+            // Adapter.addItems triggers range insert.
+            // We need to know if we should replace or append.
+            // But since ViewModel now emits the WHOLE list (in my change above), 
+            // we should probably just use setItems or DiffUtil.
+            // For simplicity, let's use setItems for now.
+            
+            adapter.setItems(items);
             if (refreshLayout.isRefreshing()) {
-                adapter.setItems(items);
                 refreshLayout.setRefreshing(false);
                 recyclerView.scrollToPosition(0);
-            } else {
-                adapter.addItems(items);
-            }
-        });
-
-        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (!isLoading && refreshLayout.isRefreshing()) {
-                refreshLayout.setRefreshing(false);
             }
         });
 
@@ -114,6 +117,7 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
     @Override
     public void onResume() {
         super.onResume();
+        // Refresh the list to update like status/counts when returning from DetailActivity
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
