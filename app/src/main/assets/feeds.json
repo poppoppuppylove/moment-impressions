@@ -4,6 +4,12 @@
     "title": "清晨的咖啡",
     "content": "美好的一天从一杯香浓的咖啡开始。阳光洒在桌面上，感觉充满活力。",
     "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_01",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_01",
+      "android.resource://com.example.moment_impressions/drawable/img_02",
+      "android.resource://com.example.moment_impressions/drawable/img_03",
+      "android.resource://com.example.moment_impressions/drawable/img_06"
+    ],
     "author": {
       "id": "u1",
       "nickname": "咖啡爱好者",
@@ -18,6 +24,10 @@
     "title": "山间徒步",
     "content": "站在山顶俯瞰的感觉太棒了，每一步的攀登都是值得的！",
     "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_04",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_04",
+      "android.resource://com.example.moment_impressions/drawable/img_05"
+    ],
     "author": {
       "id": "u2",
       "nickname": "自然探索者",
@@ -31,7 +41,14 @@
     "id": "3",
     "title": "城市夜景",
     "content": "夜晚的城市别有一番风味，霓虹灯闪烁，车水马龙。",
-    "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_03",
+    "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_08",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_08",
+      "android.resource://com.example.moment_impressions/drawable/img_01",
+      "android.resource://com.example.moment_impressions/drawable/img_02",
+      "android.resource://com.example.moment_impressions/drawable/img_06",
+      "android.resource://com.example.moment_impressions/drawable/img_07"
+    ],
     "author": {
       "id": "u3",
       "nickname": "城市漫步",
@@ -46,6 +63,11 @@
     "title": "深夜代码",
     "content": "为了解决这个Bug奋斗到天亮，程序员的日常。",
     "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_06",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_06",
+      "android.resource://com.example.moment_impressions/drawable/img_07",
+      "android.resource://com.example.moment_impressions/drawable/img_08"
+    ],
     "author": {
       "id": "u4",
       "nickname": "码农生活",
@@ -60,6 +82,11 @@
     "title": "美味佳肴",
     "content": "打卡这家新开的餐厅，意面味道简直绝了！强烈推荐。",
     "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_05",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_05",
+      "android.resource://com.example.moment_impressions/drawable/img_03",
+      "android.resource://com.example.moment_impressions/drawable/img_04"
+    ],
     "author": {
       "id": "u5",
       "nickname": "美食天堂",
@@ -74,6 +101,11 @@
     "title": "艺术展",
     "content": "被现代艺术展的作品深深吸引，每一件都充满了创意和灵感。",
     "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_02",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_02",
+      "android.resource://com.example.moment_impressions/drawable/img_06",
+      "android.resource://com.example.moment_impressions/drawable/img_07"
+    ],
     "author": {
       "id": "u6",
       "nickname": "艺术迷",
@@ -87,7 +119,10 @@
     "id": "7",
     "title": "周末时光",
     "content": "难得的周末，在公园里晒晒太阳，读一本好书。",
-    "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_07",
+    "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_03",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_03"
+    ],
     "author": {
       "id": "u7",
       "nickname": "书虫",
@@ -99,9 +134,12 @@
   },
   {
     "id": "8",
-    "title": "海边日落",
+    "title": "海边风景",
     "content": "看着太阳慢慢落下海平面，内心的平静无法言喻。",
-    "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_08",
+    "imageUrl": "android.resource://com.example.moment_impressions/drawable/img_07",
+    "images": [
+      "android.resource://com.example.moment_impressions/drawable/img_07"
+    ],
     "author": {
       "id": "u8",
       "nickname": "追风少年",

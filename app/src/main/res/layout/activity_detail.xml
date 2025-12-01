@@ -14,37 +14,46 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:expandedTitleMarginStart="16dp"
+            app:expandedTitleMarginEnd="16dp"
+            app:expandedTitleMarginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Image Area (ViewPager2) -->
+                <!-- Image Area (ViewPager2) - 高度减小，去掉多余空白 -->
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="400dp">
+                    android:layout_height="260dp"
+                    android:padding="16dp"
+                    app:layout_collapseMode="parallax"
+                    app:layout_collapseParallaxMultiplier="0.7">
 
                     <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/view_pager_images"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:padding="0dp"
+                        android:clipToPadding="false" />
 
                     <TextView
                         android:id="@+id/tv_image_indicator"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom|end"
-                        android:layout_margin="16dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="4dp"
                         android:background="@drawable/bg_indicator"
-                        android:paddingStart="8dp"
-                        android:paddingTop="4dp"
-                        android:paddingEnd="8dp"
-                        android:paddingBottom="4dp"
+                        android:paddingStart="6dp"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="6dp"
+                        android:paddingBottom="2dp"
                         android:text="1/1"
                         android:textColor="@android:color/white"
-                        android:textSize="12sp" />
+                        android:textSize="10sp" />
                 </FrameLayout>
 
                 <!-- Content Area with Author Header -->
@@ -52,7 +61,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="16dp">
 
                     <!-- Author Header -->
                     <LinearLayout
@@ -65,7 +77,8 @@
                             android:id="@+id/iv_author_avatar"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
-                            android:src="@mipmap/ic_launcher_round" />
+                            android:src="@mipmap/ic_launcher_round"
+                            android:scaleType="centerCrop" />
 
                         <TextView
                             android:id="@+id/tv_author_nickname"
@@ -93,7 +106,7 @@
                         android:id="@+id/tv_detail_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="4dp"
                         android:text="Title"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
@@ -103,7 +116,7 @@
                         android:id="@+id/tv_detail_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="4dp"
                         android:text="This is the content of the feed. It can be very long..."
                         android:textColor="@android:color/black"
                         android:textSize="14sp" />

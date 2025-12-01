@@ -47,8 +47,8 @@ public class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.Im
         }
 
         public void bind(String url) {
-            // 使用 FitCenter 确保图片完整显示在详情页轮播中
-            ImageLoader.loadFitCenter(itemView.getContext(), url, imageView);
+            // 使用默认加载（xml中设置了centerCrop）确保图片统一填充且无白边
+            ImageLoader.load(itemView.getContext(), url, imageView);
         }
     }
 }

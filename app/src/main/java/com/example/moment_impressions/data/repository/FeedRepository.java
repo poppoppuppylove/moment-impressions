@@ -98,27 +98,38 @@ public class FeedRepository {
 
     private void generateFallbackData() {
         // Initialize mock data
+        String[] availableImages = {
+            "android.resource://com.example.moment_impressions/drawable/img_01",
+            "android.resource://com.example.moment_impressions/drawable/img_02",
+            "android.resource://com.example.moment_impressions/drawable/img_03",
+            "android.resource://com.example.moment_impressions/drawable/img_04",
+            "android.resource://com.example.moment_impressions/drawable/img_05",
+            "android.resource://com.example.moment_impressions/drawable/img_06",
+            "android.resource://com.example.moment_impressions/drawable/img_07",
+            "android.resource://com.example.moment_impressions/drawable/img_08"
+        };
+
         for (int i = 0; i < 20; i++) {
             String id = String.valueOf(i);
             // 使用 Dicebear 生成随机头像
             User user = new User("u" + id, "用户" + id, "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
 
-            // 使用打包资源示例图片作为封面，确保任意设备可正常显示
-            // 偶数项尝试使用用户提供的本地路径 (如果存在)
-            String imageUrl = (i % 2 == 0) ? DEVICE_IMAGE_1 : LOCAL_SAMPLE_IMAGE;
+            // Randomly select a cover image
+            String imageUrl = availableImages[random.nextInt(availableImages.length)];
 
             FeedItem item = new FeedItem(id, "标题 " + id,
                     "这是帖子 " + id + " 的详细内容。描述了这个精彩瞬间。",
                     imageUrl, user, random.nextInt(1000), random.nextInt(24) + "小时前");
             item.setHeight(400 + random.nextInt(200)); // Random height for staggered effect
 
-            // 为轮播添加更多图片（统一使用资源URI，避免设备路径不可读）
+            // 为轮播添加更多图片（统一使用有效资源URI）
             List<String> images = new ArrayList<>();
             images.add(imageUrl);
-            images.add(LOCAL_SAMPLE_IMAGE);
+            
+            // Add 1-3 extra random images
             int extraCount = 1 + random.nextInt(3);
             for (int j = 0; j < extraCount; j++) {
-                images.add(LOCAL_SAMPLE_IMAGE);
+                 images.add(availableImages[random.nextInt(availableImages.length)]);
             }
             item.setImages(images);
 
@@ -176,44 +187,39 @@ public class FeedRepository {
         return data;
     }
 
-    // 简单的网络刷新：拉取示例图片并更新部分 Feed 的图片列表
+    // 简单的网络刷新：不再注入可能不可访问的网络图片，仅模拟刷新
     public LiveData<Boolean> refreshFromNetwork() {
         androidx.lifecycle.MutableLiveData<Boolean> result = new androidx.lifecycle.MutableLiveData<>();
-        com.example.moment_impressions.core.net.NetworkClient.getService().listPhotos(6)
-                .enqueue(new retrofit2.Callback<java.util.List<com.example.moment_impressions.core.net.model.Photo>>() {
-                    @Override
-                    public void onResponse(retrofit2.Call<java.util.List<com.example.moment_impressions.core.net.model.Photo>> call,
-                            retrofit2.Response<java.util.List<com.example.moment_impressions.core.net.model.Photo>> response) {
-                        java.util.List<com.example.moment_impressions.core.net.model.Photo> photos = response.body();
-                        if (photos != null && !photos.isEmpty()) {
-                            java.util.List<String> urls = new java.util.ArrayList<>();
-                            for (com.example.moment_impressions.core.net.model.Photo p : photos) {
-                                if (p.url != null) urls.add(p.url);
-                            }
-                            synchronized (lock) {
-                                // 将网络图片注入前两个帖子作为轮播补充
-                                int count = Math.min(2, allFeeds.size());
-                                for (int i = 0; i < count; i++) {
-                                    FeedItem item = allFeeds.get(i);
-                                    java.util.List<String> merged = new java.util.ArrayList<>();
-                                    if (item.getImages() != null) merged.addAll(item.getImages());
-                                    merged.addAll(urls);
-                                    item.setImages(merged);
-                                }
-                            }
-                            result.setValue(true);
-                        } else {
-                            result.setValue(false);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(retrofit2.Call<java.util.List<com.example.moment_impressions.core.net.model.Photo>> call,
-                            Throwable t) {
-                        result.setValue(false);
-                    }
-                });
+        // Simulate network delay and success
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            result.setValue(true);
+        }, 1000);
         return result;
+    }
+
+    // 解析时间字符串为分钟数
+    private int parseTime(String timeStr) {
+        if (timeStr == null || timeStr.equals("刚刚")) return 0;
+        try {
+            if (timeStr.contains("分钟前")) {
+                return Integer.parseInt(timeStr.replace("分钟前", "").trim());
+            } else if (timeStr.contains("小时前")) {
+                return Integer.parseInt(timeStr.replace("小时前", "").trim()) * 60;
+            } else if (timeStr.contains("天前")) {
+                return Integer.parseInt(timeStr.replace("天前", "").trim()) * 24 * 60;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 60; // Default fallback
+    }
+
+    // 格式化分钟数为时间字符串
+    private String formatTime(int minutes) {
+        if (minutes <= 1) return "刚刚";
+        if (minutes < 60) return minutes + "分钟前";
+        if (minutes < 24 * 60) return (minutes / 60) + "小时前";
+        return (minutes / (24 * 60)) + "天前";
     }
 
     public LiveData<List<CommentItem>> getComments(String feedId) {
@@ -226,27 +232,53 @@ public class FeedRepository {
                     items = commentCache.get(feedId);
                 } else {
                     items = new ArrayList<>();
-                    if (!commentPool.isEmpty()) {
-                        int count = 3 + random.nextInt(5); // 3 to 7 comments
-                        for (int i = 0; i < count; i++) {
-                            CommentItem original = commentPool.get(random.nextInt(commentPool.size()));
-                            // Clone or create new to avoid shared state issues if needed, but for read-only display it's fine.
-                            // However, we need unique IDs if we plan to like them individually per feed.
-                            // So let's create a copy with a unique ID.
-                            String id = feedId + "_c_" + i + "_" + System.currentTimeMillis();
-                            items.add(new CommentItem(id, original.getContent(), original.getAuthor(), original.getTime(), original.getLikesCount()));
+
+                    // 查找当前帖子对象
+                    FeedItem currentFeed = null;
+                    for (FeedItem item : allFeeds) { if (item.getId().equals(feedId)) { currentFeed = item; break; } }
+                    if (currentFeed == null) { for (FeedItem item : localCache) { if (item.getId().equals(feedId)) { currentFeed = item; break; } } }
+                    if (currentFeed == null) { for (FeedItem item : myPosts) { if (item.getId().equals(feedId)) { currentFeed = item; break; } } }
+
+                    // 检查是否为用户自己发布的帖子
+                    boolean isMyPost = currentFeed != null && myPosts.contains(currentFeed);
+
+                    // 只有非用户发布的帖子才生成模拟评论
+                    if (!isMyPost) {
+                        // 获取帖子发布时间（分钟数）
+                        int postTimeMinutes = 60; // 默认
+                        if (currentFeed != null) {
+                            postTimeMinutes = parseTime(currentFeed.getTime());
                         }
-                    } else {
-                         // Fallback if pool is empty
-                        String[] comments = {
-                            "拍得真不错！", "太美了！", "下次我也要去。", "这是在哪里呀？", "光影效果很棒！", "我也想学摄影。", "楼主好厉害！", "太有感觉了！", "赞赞赞！", "期待更多作品！"
-                        };
-                        for (int i = 0; i < 5; i++) {
-                            String id = feedId + "_c_" + i;
-                            User user = new User("u" + id, "评论用户" + i, "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
-                            items.add(new CommentItem(id,
-                                    comments[random.nextInt(comments.length)] + " " + i,
-                                    user, "1小时前", random.nextInt(100)));
+
+                        if (!commentPool.isEmpty()) {
+                            int count = 3 + random.nextInt(5); // 3 to 7 comments
+                            for (int i = 0; i < count; i++) {
+                                CommentItem original = commentPool.get(random.nextInt(commentPool.size()));
+                                String id = feedId + "_c_" + i + "_" + System.currentTimeMillis();
+                                
+                                // 生成合理的评论时间：不能早于发帖时间（即数值不能大于 postTimeMinutes）
+                                // 评论时间（分钟前）应在 [0, postTimeMinutes] 范围内
+                                int commentTimeMinutes = random.nextInt(postTimeMinutes + 1);
+                                String validTime = formatTime(commentTimeMinutes);
+
+                                items.add(new CommentItem(id, original.getContent(), original.getAuthor(), validTime, original.getLikesCount()));
+                            }
+                        } else {
+                             // Fallback if pool is empty
+                            String[] comments = {
+                                "拍得真不错！", "太美了！", "下次我也要去。", "这是在哪里呀？", "光影效果很棒！", "我也想学摄影。", "楼主好厉害！", "太有感觉了！", "赞赞赞！", "期待更多作品！"
+                            };
+                            for (int i = 0; i < 5; i++) {
+                                String id = feedId + "_c_" + i;
+                                User user = new User("u" + id, "评论用户" + i, "https://api.dicebear.com/7.x/avataaars/png?seed=" + id);
+                                
+                                int commentTimeMinutes = random.nextInt(postTimeMinutes + 1);
+                                String validTime = formatTime(commentTimeMinutes);
+
+                                items.add(new CommentItem(id,
+                                        comments[random.nextInt(comments.length)] + " " + i,
+                                        user, validTime, random.nextInt(100)));
+                            }
                         }
                     }
                     commentCache.put(feedId, items);
