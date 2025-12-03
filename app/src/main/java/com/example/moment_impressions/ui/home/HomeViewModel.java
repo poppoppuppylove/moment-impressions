@@ -5,17 +5,28 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.moment_impressions.core.base.BaseViewModel;
 import com.example.moment_impressions.data.model.FeedItem;
 import com.example.moment_impressions.data.repository.FeedRepository;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeViewModel extends BaseViewModel {
 
+    public enum UiState {
+        LOADING,
+        CONTENT,
+        EMPTY,
+        ERROR
+    }
+
     private final FeedRepository repository;
     private final MutableLiveData<List<FeedItem>> feedList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+    private final MutableLiveData<UiState> uiState = new MutableLiveData<>(UiState.LOADING);
+    private final List<FeedItem> currentItems = new ArrayList<>();
     private int currentPage = 0;
 
     public HomeViewModel() {
         repository = FeedRepository.getInstance();
+        refresh();
     }
 
     public LiveData<List<FeedItem>> getFeedList() {
@@ -26,48 +37,73 @@ public class HomeViewModel extends BaseViewModel {
         return isLoading;
     }
 
+    public LiveData<UiState> getUiState() {
+        return uiState;
+    }
+
     public void refresh() {
         currentPage = 0;
-        // 先本地/模拟加载一页，提高首屏速度
+        isLoading.setValue(true);
+        
+        // 模拟网络错误概率 (10% chance of failure for demo purposes)
+        // For better UX in demo, maybe we don't fail on first load unless requested,
+        // but to show "Error Retry" capability, let's just assume it works or we can manually trigger error.
+        // Here we stick to normal flow but handle empty/error states.
+        
         loadData();
-        // 并行触发网络刷新，成功后再加载一次以合并网络数据
+        
+        // 并行触发网络刷新
         repository.refreshFromNetwork().observeForever(success -> {
             if (success != null && success) {
+                // In a real app, we would merge or clear; here we just reload page 0
                 loadData();
+            } else {
+                // If network fails and we have no data, show error
+                if (currentItems.isEmpty()) {
+                    uiState.setValue(UiState.ERROR);
+                }
+                isLoading.setValue(false);
             }
         });
     }
 
     public void loadMore() {
+        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        
         currentPage++;
-        loadData();
+        isLoading.setValue(true);
+        
+        repository.getFeedList(currentPage).observeForever(items -> {
+            isLoading.setValue(false);
+            if (items != null && !items.isEmpty()) {
+                currentItems.addAll(items);
+                feedList.setValue(new ArrayList<>(currentItems));
+                uiState.setValue(UiState.CONTENT);
+            } else {
+                // No more data, do nothing or show footer "no more data"
+            }
+        });
+    }
+
+    public void retry() {
+        uiState.setValue(UiState.LOADING);
+        refresh();
     }
 
     private void loadData() {
-        isLoading.setValue(true);
-        // Observe the LiveData from Repository.
-        // In a real app with Retrofit, we might use a Callback or RxJava/Coroutines.
-        // Here Repository returns LiveData which simulates a network call.
-        // We need to observe it forever or use a MediatorLiveData if we want to chain.
-        // For simplicity with the current Repository implementation which returns a new
-        // LiveData each time:
         repository.getFeedList(currentPage).observeForever(items -> {
             isLoading.setValue(false);
-            if (items != null) {
-                // If refreshing (page 0), replace list. If loading more, append.
-                if (currentPage == 0) {
-                     feedList.setValue(items);
-                } else {
-                     List<FeedItem> current = feedList.getValue();
-                     if (current != null) {
-                         // Avoid simple addAll to prevent duplicates if Repository returns overlap
-                         // For now, just append.
-                         current.addAll(items);
-                         feedList.setValue(current);
-                     } else {
-                         feedList.setValue(items);
-                     }
-                }
+            if (currentPage == 0) {
+                currentItems.clear();
+            }
+            
+            if (items != null && !items.isEmpty()) {
+                currentItems.addAll(items);
+                feedList.setValue(new ArrayList<>(currentItems));
+                uiState.setValue(UiState.CONTENT);
+            } else if (currentPage == 0) {
+                // Only show empty state if first page is empty
+                uiState.setValue(UiState.EMPTY);
             }
         });
     }

@@ -16,6 +16,9 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
+    private View layoutEmpty;
+    private View layoutError;
+    private View btnRetry;
     private FeedAdapter adapter;
     private ActivityResultLauncher<android.content.Intent> publishLauncher;
 
@@ -33,6 +36,9 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
     protected void initView(View view) {
         recyclerView = view.findViewById(R.id.recycler_view);
         refreshLayout = view.findViewById(R.id.refresh_layout);
+        layoutEmpty = view.findViewById(R.id.layout_empty);
+        layoutError = view.findViewById(R.id.layout_error);
+        btnRetry = view.findViewById(R.id.btn_retry);
 
         publishLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
@@ -70,6 +76,8 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
 
         refreshLayout.setOnRefreshListener(() -> viewModel.refresh());
 
+        btnRetry.setOnClickListener(v -> viewModel.retry());
+
         view.findViewById(R.id.fab_add).setOnClickListener(v -> {
             android.content.Intent intent = new android.content.Intent(getContext(),
                     com.example.moment_impressions.ui.publish.PublishActivity.class);
@@ -91,27 +99,61 @@ public class HomeFragment extends BaseFragment<HomeViewModel> {
 
     @Override
     protected void initData() {
-        viewModel.getFeedList().observe(getViewLifecycleOwner(), items -> {
-            if (items == null) return;
-            
-            // If it's a refresh (or initial load), items will contain the full list or first page.
-            // Since ViewModel now manages the full list for pagination, we just set it.
-            // However, Adapter.setItems triggers a full refresh.
-            // Adapter.addItems triggers range insert.
-            // We need to know if we should replace or append.
-            // But since ViewModel now emits the WHOLE list (in my change above), 
-            // we should probably just use setItems or DiffUtil.
-            // For simplicity, let's use setItems for now.
-            
-            adapter.setItems(items);
-            if (refreshLayout.isRefreshing()) {
-                refreshLayout.setRefreshing(false);
-                recyclerView.scrollToPosition(0);
+        viewModel.getUiState().observe(getViewLifecycleOwner(), state -> {
+            switch (state) {
+                case LOADING:
+                    if (adapter.getItemCount() == 0) {
+                        refreshLayout.setRefreshing(true);
+                    }
+                    layoutEmpty.setVisibility(View.GONE);
+                    layoutError.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    break;
+                case CONTENT:
+                    refreshLayout.setRefreshing(false);
+                    layoutEmpty.setVisibility(View.GONE);
+                    layoutError.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    break;
+                case EMPTY:
+                    refreshLayout.setRefreshing(false);
+                    layoutEmpty.setVisibility(View.VISIBLE);
+                    layoutError.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.GONE);
+                    break;
+                case ERROR:
+                    refreshLayout.setRefreshing(false);
+                    layoutEmpty.setVisibility(View.GONE);
+                    layoutError.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                    break;
             }
         });
 
-        // Initial load
-        viewModel.refresh();
+        viewModel.getFeedList().observe(getViewLifecycleOwner(), items -> {
+            if (items != null) {
+                adapter.setItems(items);
+            }
+        });
+
+        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            // If loading and we have content, it means we are loading more (or refreshing with content)
+            // If refreshing, SwipeRefreshLayout handles it.
+            // If loading more, we show footer.
+            // How to distinguish? 
+            // If refreshLayout.isRefreshing() is true, it's refresh.
+            // But refreshLayout.setRefreshing is called in UiState observer.
+            
+            // Simple logic: If list is not empty, show footer when loading.
+            if (adapter.getItemCount() > 0 && Boolean.TRUE.equals(isLoading) && !refreshLayout.isRefreshing()) {
+                 adapter.setFooterVisible(true);
+            } else {
+                 adapter.setFooterVisible(false);
+            }
+        });
+
+        // Initial load handled by ViewModel constructor but good to ensure
+        // viewModel.refresh(); // Already in ViewModel constructor
     }
 
     @Override

@@ -13,9 +13,13 @@ import com.example.moment_impressions.data.model.FeedItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder> {
+public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_FOOTER = 1;
 
     private List<FeedItem> items = new ArrayList<>();
+    private boolean isFooterVisible = false;
 
     public void setItems(List<FeedItem> items) {
         this.items = items;
@@ -28,22 +32,74 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         notifyItemRangeInserted(start, items.size());
     }
 
+    public void setFooterVisible(boolean visible) {
+        if (isFooterVisible != visible) {
+            isFooterVisible = visible;
+            if (visible) {
+                notifyItemInserted(items.size());
+            } else {
+                notifyItemRemoved(items.size());
+            }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (isFooterVisible && position == items.size()) {
+            return TYPE_FOOTER;
+        }
+        return TYPE_ITEM;
+    }
+
     @NonNull
     @Override
-    public FeedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_FOOTER) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_footer_loading, parent, false);
+            // StaggeredGridLayoutManager needs full span for footer
+            ViewGroup.LayoutParams lp = view.getLayoutParams();
+            if (lp instanceof androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams) {
+                ((androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams) lp).setFullSpan(true);
+            } else {
+                // If layout params are generic margin params or similar, cast to Staggered... might fail if not attached yet?
+                // Safest is to create new Staggered params or handle in onBind if needed.
+                // But usually inflation with parent works.
+                // Let's ensure it's StaggeredLayoutParams
+                androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams staggeredLp = 
+                    new androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                staggeredLp.setFullSpan(true);
+                view.setLayoutParams(staggeredLp);
+            }
+            return new FooterViewHolder(view);
+        }
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_feed, parent, false);
         return new FeedViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
-        FeedItem item = items.get(position);
-        holder.bind(item);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof FeedViewHolder) {
+            FeedItem item = items.get(position);
+            ((FeedViewHolder) holder).bind(item);
+        } else if (holder instanceof FooterViewHolder) {
+            // Ensure full span
+            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+            if (lp instanceof androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams) {
+                ((androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams) lp).setFullSpan(true);
+            }
+        }
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items.size() + (isFooterVisible ? 1 : 0);
+    }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        public FooterViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
     }
 
     class FeedViewHolder extends RecyclerView.ViewHolder {
